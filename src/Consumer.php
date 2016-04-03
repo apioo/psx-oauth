@@ -24,8 +24,8 @@ use PSX\Data\Reader\Form;
 use PSX\Framework\Base;
 use PSX\Http\Client;
 use PSX\Http\PostRequest;
-use PSX\Oauth\Provider\Data\Response;
-use PSX\Oauth\Provider\ResponseImporter;
+use PSX\Oauth\Data\Response;
+use PSX\Oauth\ResponseImporter;
 use PSX\Oauth\Signature;
 use PSX\Uri\Url;
 use RuntimeException;
@@ -52,7 +52,7 @@ class Consumer
     protected $reader;
 
     /**
-     * @var \PSX\Oauth\Provider\ResponseImporter
+     * @var \PSX\Oauth\ResponseImporter
      */
     protected $importer;
 
@@ -80,7 +80,7 @@ class Consumer
      * @param string $consumerSecret
      * @param string $method
      * @param string $callback
-     * @return \PSX\Oauth\Provider\Data\Response
+     * @return \PSX\Oauth\Data\Response
      */
     public function requestToken(Url $url, $consumerKey, $consumerSecret, $method = 'HMAC-SHA1', $callback = null)
     {
@@ -113,7 +113,7 @@ class Consumer
         // request unauthorized token
         $request  = new PostRequest($url, array(
             'Authorization' => 'OAuth realm="psx", ' . self::buildAuthString($values),
-            'User-Agent'    => __CLASS__ . ' ' . Base::VERSION,
+            'User-Agent'    => __CLASS__,
         ));
         $response = $this->client->request($request);
 
@@ -141,7 +141,7 @@ class Consumer
      * @param string $tokenSecret
      * @param string $verifier
      * @param string $method
-     * @return \PSX\Oauth\Provider\Data\Response
+     * @return \PSX\Oauth\Data\Response
      */
     public function accessToken(Url $url, $consumerKey, $consumerSecret, $token, $tokenSecret, $verifier, $method = 'HMAC-SHA1')
     {
@@ -169,7 +169,7 @@ class Consumer
         // request access token
         $request  = new PostRequest($url, array(
             'Authorization' => 'OAuth realm="psx", ' . self::buildAuthString($values),
-            'User-Agent'    => __CLASS__ . ' ' . Base::VERSION,
+            'User-Agent'    => __CLASS__,
         ));
         $response = $this->client->request($request);
 

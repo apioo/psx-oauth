@@ -132,7 +132,7 @@ TEXT;
         $url      = new Url('http://127.0.0.1/requestToken');
         $response = $oauth->requestToken($url, self::CONSUMER_KEY, self::CONSUMER_SECRET);
 
-        $this->assertInstanceOf('PSX\Oauth\Provider\Data\Response', $response);
+        $this->assertInstanceOf('PSX\Oauth\Data\Response', $response);
         $this->assertEquals(self::TMP_TOKEN, $response->getToken());
         $this->assertEquals(self::TMP_TOKEN_SECRET, $response->getTokenSecret());
 
@@ -146,7 +146,7 @@ TEXT;
         $url      = new Url('http://127.0.0.1/accessToken');
         $response = $oauth->accessToken($url, self::CONSUMER_KEY, self::CONSUMER_SECRET, self::TMP_TOKEN, self::TMP_TOKEN, self::VERIFIER);
 
-        $this->assertInstanceOf('PSX\Oauth\Provider\Data\Response', $response);
+        $this->assertInstanceOf('PSX\Oauth\Data\Response', $response);
         $this->assertEquals(self::TOKEN, $response->getToken());
         $this->assertEquals(self::TOKEN_SECRET, $response->getTokenSecret());
 

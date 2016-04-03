@@ -18,9 +18,9 @@
  * limitations under the License.
  */
 
-namespace PSX\Oauth\Provider\Data;
+namespace PSX\Oauth\Data;
 
-use PSX\Data\Record;
+use PSX\Record\Record;
 
 /**
  * Response

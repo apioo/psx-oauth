@@ -18,10 +18,10 @@
  * limitations under the License.
  */
 
-namespace PSX\Oauth\Provider\Data;
+namespace PSX\Oauth\Data;
 
 use PSX\Data\InvalidDataException;
-use PSX\Data\Record;
+use PSX\Record\Record;
 use PSX\Validate;
 
 /**

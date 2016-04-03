@@ -18,38 +18,42 @@
  * limitations under the License.
  */
 
-namespace PSX\Oauth\Tests\Provider;
+namespace PSX\Oauth;
 
-use PSX\Framework\Controller\ControllerAbstract;
-use PSX\Framework\Filter\OauthAuthentication;
-use PSX\Oauth\Provider\Data\Credentials;
-use PSX\Oauth\Tests\ConsumerTest;
+use InvalidArgumentException;
+use PSX\Oauth\Data\Response;
 
 /**
- * TestOauth
+ * ResponseImporter
  *
  * @author  Christoph Kappestein <k42b3.x@gmail.com>
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @link    http://phpsx.org
  */
-class TestOauth extends ControllerAbstract
+class ResponseImporter
 {
-    public function getRequestFilter()
+    public function import(Response $record, $data)
     {
-        $handle = new OauthAuthentication(function ($consumerKey, $token) {
+        if (!is_array($data) && !$data instanceof \stdClass) {
+            throw new InvalidArgumentException('Received invalid data');
+        }
 
-            if ($consumerKey == ConsumerTest::CONSUMER_KEY && $token == ConsumerTest::TOKEN) {
-                return new Credentials(ConsumerTest::CONSUMER_KEY, ConsumerTest::CONSUMER_SECRET, ConsumerTest::TOKEN, ConsumerTest::TOKEN_SECRET);
+        foreach ($data as $key => $value) {
+            switch ($key) {
+                case 'oauth_token':
+                    $record->setToken($value);
+                    break;
+
+                case 'oauth_token_secret':
+                    $record->setTokenSecret($value);
+                    break;
+
+                default:
+                    $record->addParam($key, $value);
+                    break;
             }
+        }
 
-        });
-
-        return array($handle);
-    }
-
-    public function doIndex()
-    {
-        $this->response->setStatus(200);
-        $this->response->getBody()->write('SUCCESS');
+        return $record;
     }
 }

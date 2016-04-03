@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-namespace PSX\Oauth\Provider\Data;
+namespace PSX\Oauth\Data;
 
 /**
  * Credentials
