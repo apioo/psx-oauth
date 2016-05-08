@@ -1,6 +1,6 @@
 {
   "name": "psx/oauth",
-  "description": "Oauth consumer and provider",
+  "description": "Oauth consumer",
   "keywords": ["oauth"],
   "homepage": "http://phpsx.org",
   "license": "Apache-2.0",
