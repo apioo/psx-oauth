@@ -20,12 +20,14 @@
 
 namespace PSX\Oauth\Tests;
 
-use PSX\Http\Client as HttpClient;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
 use PSX\Http\Authentication;
-use PSX\Http\GetRequest;
-use PSX\Http\Handler\Callback;
-use PSX\Http\RequestInterface;
-use PSX\Http\ResponseParser;
+use PSX\Http\Client\Client;
+use PSX\Http\Client\GetRequest;
+use PSX\Oauth\Data;
 use PSX\Oauth\Consumer;
 use PSX\Uri\Url;
 
@@ -49,90 +51,31 @@ class ConsumerTest extends \PHPUnit_Framework_TestCase
 
     public function testFlow()
     {
-        $testCase = $this;
-        $http = new HttpClient(new Callback(function (RequestInterface $request) use ($testCase) {
+        $tmpToken       = self::TMP_TOKEN;
+        $tmpTokenSecret = self::TMP_TOKEN_SECRET;
+        $token          = self::TOKEN;
+        $tokenSecret    = self::TOKEN_SECRET;
 
-            // request token
-            if ($request->getUri()->getPath() == '/requestToken') {
-                $auth = Authentication::decodeParameters((string) $request->getHeader('Authorization'));
+        $mock = new MockHandler([
+            new Response(200, ['Content-Type' => 'application/x-www-form-urlencoded'], "oauth_token={$tmpToken}&oauth_token_secret={$tmpTokenSecret}&oauth_callback_confirmed=1"),
+            new Response(200, ['Content-Type' => 'application/x-www-form-urlencoded'], "oauth_token={$token}&oauth_token_secret={$tokenSecret}"),
+            new Response(200, ['Content-Type' => 'text/plain'], 'SUCCESS'),
+        ]);
 
-                $testCase->assertEquals(self::CONSUMER_KEY, $auth['oauth_consumer_key']);
-                $testCase->assertEquals('HMAC-SHA1', $auth['oauth_signature_method']);
-                $testCase->assertTrue(isset($auth['oauth_timestamp']));
-                $testCase->assertTrue(isset($auth['oauth_nonce']));
-                $testCase->assertEquals('1.0', $auth['oauth_version']);
-                $testCase->assertEquals('oob', $auth['oauth_callback']);
-                $testCase->assertTrue(isset($auth['oauth_signature']));
+        $container = [];
+        $history = Middleware::history($container);
 
-                $tmpToken       = self::TMP_TOKEN;
-                $tmpTokenSecret = self::TMP_TOKEN_SECRET;
+        $stack = HandlerStack::create($mock);
+        $stack->push($history);
 
-                $response = <<<TEXT
-HTTP/1.1 200 OK
-Date: Thu, 26 Sep 2013 16:36:25 GMT
-Content-Type: application/x-www-form-urlencoded
-
-oauth_token={$tmpToken}&oauth_token_secret={$tmpTokenSecret}&oauth_callback_confirmed=1
-TEXT;
-            }
-            // access token
-            elseif ($request->getUri()->getPath() == '/accessToken') {
-                $auth = Authentication::decodeParameters((string) $request->getHeader('Authorization'));
-
-                $testCase->assertEquals(self::CONSUMER_KEY, $auth['oauth_consumer_key']);
-                $testCase->assertEquals(self::TMP_TOKEN, $auth['oauth_token']);
-                $testCase->assertEquals('HMAC-SHA1', $auth['oauth_signature_method']);
-                $testCase->assertTrue(isset($auth['oauth_timestamp']));
-                $testCase->assertTrue(isset($auth['oauth_nonce']));
-                $testCase->assertEquals('1.0', $auth['oauth_version']);
-                $testCase->assertEquals(self::VERIFIER, $auth['oauth_verifier']);
-                $testCase->assertTrue(isset($auth['oauth_signature']));
-
-                $token       = self::TOKEN;
-                $tokenSecret = self::TOKEN_SECRET;
-
-                $response = <<<TEXT
-HTTP/1.1 200 OK
-Date: Thu, 26 Sep 2013 16:36:26 GMT
-Content-Type: application/x-www-form-urlencoded
-
-oauth_token={$token}&oauth_token_secret={$tokenSecret}
-TEXT;
-            }
-            // api request
-            elseif ($request->getUri()->getPath() == '/api') {
-                $auth = Authentication::decodeParameters((string) $request->getHeader('Authorization'));
-
-                $testCase->assertEquals(self::CONSUMER_KEY, $auth['oauth_consumer_key']);
-                $testCase->assertEquals(self::TOKEN, $auth['oauth_token']);
-                $testCase->assertEquals('HMAC-SHA1', $auth['oauth_signature_method']);
-                $testCase->assertTrue(isset($auth['oauth_timestamp']));
-                $testCase->assertTrue(isset($auth['oauth_nonce']));
-                $testCase->assertEquals('1.0', $auth['oauth_version']);
-                $testCase->assertTrue(isset($auth['oauth_signature']));
-
-                $response = <<<TEXT
-HTTP/1.1 200 OK
-Date: Thu, 26 Sep 2013 16:36:26 GMT
-Content-Type: text/html; charset=UTF-8
-
-SUCCESS
-TEXT;
-            } else {
-                throw new \RuntimeException('Invalid path');
-            }
-
-            return ResponseParser::convert($response, ResponseParser::MODE_LOOSE)->toString();
-
-        }));
-
-        $oauth = new Consumer($http);
+        $client = new Client(['handler' => $stack]);
+        $oauth  = new Consumer($client);
 
         // request token
         $url      = new Url('http://127.0.0.1/requestToken');
         $response = $oauth->requestToken($url, self::CONSUMER_KEY, self::CONSUMER_SECRET);
 
-        $this->assertInstanceOf('PSX\Oauth\Data\Response', $response);
+        $this->assertInstanceOf(Data\Response::class, $response);
         $this->assertEquals(self::TMP_TOKEN, $response->getToken());
         $this->assertEquals(self::TMP_TOKEN_SECRET, $response->getTokenSecret());
 
@@ -146,7 +89,7 @@ TEXT;
         $url      = new Url('http://127.0.0.1/accessToken');
         $response = $oauth->accessToken($url, self::CONSUMER_KEY, self::CONSUMER_SECRET, self::TMP_TOKEN, self::TMP_TOKEN, self::VERIFIER);
 
-        $this->assertInstanceOf('PSX\Oauth\Data\Response', $response);
+        $this->assertInstanceOf(Data\Response::class, $response);
         $this->assertEquals(self::TOKEN, $response->getToken());
         $this->assertEquals(self::TOKEN_SECRET, $response->getTokenSecret());
 
@@ -154,10 +97,51 @@ TEXT;
         $url      = new Url('http://127.0.0.1/api');
         $auth     = $oauth->getAuthorizationHeader($url, self::CONSUMER_KEY, self::CONSUMER_SECRET, self::TOKEN, self::TOKEN_SECRET, 'HMAC-SHA1', 'GET');
         $request  = new GetRequest($url, array('Authorization' => $auth));
-        $response = $http->request($request);
+        $response = $client->request($request);
 
         $this->assertEquals(200, $response->getStatusCode());
         $this->assertEquals('SUCCESS', (string) $response->getBody());
+
+        $this->assertEquals(3, count($container));
+        $transaction = array_shift($container);
+
+        $header = $transaction['request']->getHeaderLine('Authorization');
+        $auth   = Authentication::decodeParameters($header);
+
+        $this->assertEquals(self::CONSUMER_KEY, $auth['oauth_consumer_key']);
+        $this->assertEquals('HMAC-SHA1', $auth['oauth_signature_method']);
+        $this->assertTrue(isset($auth['oauth_timestamp']));
+        $this->assertTrue(isset($auth['oauth_nonce']));
+        $this->assertEquals('1.0', $auth['oauth_version']);
+        $this->assertEquals('oob', $auth['oauth_callback']);
+        $this->assertTrue(isset($auth['oauth_signature']));
+        
+        $transaction = array_shift($container);
+
+        $header = $transaction['request']->getHeaderLine('Authorization');
+        $auth   = Authentication::decodeParameters($header);
+
+        $this->assertEquals(self::CONSUMER_KEY, $auth['oauth_consumer_key']);
+        $this->assertEquals(self::TMP_TOKEN, $auth['oauth_token']);
+        $this->assertEquals('HMAC-SHA1', $auth['oauth_signature_method']);
+        $this->assertTrue(isset($auth['oauth_timestamp']));
+        $this->assertTrue(isset($auth['oauth_nonce']));
+        $this->assertEquals('1.0', $auth['oauth_version']);
+        $this->assertEquals(self::VERIFIER, $auth['oauth_verifier']);
+        $this->assertTrue(isset($auth['oauth_signature']));
+
+        $transaction = array_shift($container);
+
+        $header = $transaction['request']->getHeaderLine('Authorization');
+        $auth   = Authentication::decodeParameters($header);
+
+        $this->assertEquals(self::CONSUMER_KEY, $auth['oauth_consumer_key']);
+        $this->assertEquals(self::TOKEN, $auth['oauth_token']);
+        $this->assertEquals('HMAC-SHA1', $auth['oauth_signature_method']);
+        $this->assertTrue(isset($auth['oauth_timestamp']));
+        $this->assertTrue(isset($auth['oauth_nonce']));
+        $this->assertEquals('1.0', $auth['oauth_version']);
+        $this->assertTrue(isset($auth['oauth_signature']));
     }
 
     public function testOAuthBuildAuthString()
