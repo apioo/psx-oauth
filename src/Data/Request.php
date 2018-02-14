@@ -20,9 +20,7 @@
 
 namespace PSX\Oauth\Data;
 
-use PSX\Data\InvalidDataException;
 use PSX\Record\Record;
-use PSX\Validate;
 
 /**
  * Request
@@ -63,7 +61,7 @@ class Request extends Record
                 break;
 
             default:
-                throw new InvalidDataException('Invalid signature method');
+                throw new \InvalidArgumentException('Invalid signature method');
                 break;
         }
     }
@@ -91,7 +89,7 @@ class Request extends Record
         if (is_numeric($timestamp) && strlen($timestamp) == 10) {
             $this->setProperty('oauth_timestamp', $timestamp);
         } else {
-            throw new InvalidDataException('Invalid timestamp format');
+            throw new \InvalidArgumentException('Invalid timestamp format');
         }
     }
 
@@ -119,7 +117,7 @@ class Request extends Record
         } elseif (strlen($callback) >= 7 && strlen($callback) <= 256 && filter_var($callback, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
             $this->setProperty('oauth_callback', $callback);
         } else {
-            throw new InvalidDataException('Invalid callback format');
+            throw new \InvalidArgumentException('Invalid callback format');
         }
     }
 
@@ -143,7 +141,7 @@ class Request extends Record
         if (strlen($verifier) >= 16 && strlen($verifier) <= 512) {
             $this->setProperty('oauth_verifier', $verifier);
         } else {
-            throw new InvalidDataException('Invalid verifier format');
+            throw new \InvalidArgumentException('Invalid verifier format');
         }
     }
 

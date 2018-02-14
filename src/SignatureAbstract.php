@@ -20,8 +20,6 @@
 
 namespace PSX\Oauth;
 
-use PSX\Oauth\Consumer;
-
 /**
  * SignatureAbstract
  *

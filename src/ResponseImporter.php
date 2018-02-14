@@ -32,11 +32,9 @@ use PSX\Oauth\Data\Response;
  */
 class ResponseImporter
 {
-    public function import(Response $record, $data)
+    public function import(Response $record, $body)
     {
-        if (!is_array($data) && !$data instanceof \stdClass) {
-            throw new InvalidArgumentException('Received invalid data');
-        }
+        parse_str($body, $data);
 
         foreach ($data as $key => $value) {
             switch ($key) {

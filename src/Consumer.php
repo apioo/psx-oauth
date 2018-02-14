@@ -20,12 +20,9 @@
 
 namespace PSX\Oauth;
 
-use PSX\Data\Reader\Form;
-use PSX\Framework\Base;
-use PSX\Http\Client;
-use PSX\Http\PostRequest;
+use PSX\Http\Client\ClientInterface;
+use PSX\Http\Client\PostRequest;
 use PSX\Oauth\Data\Response;
-use PSX\Oauth\ResponseImporter;
 use PSX\Oauth\Signature;
 use PSX\Uri\Url;
 use RuntimeException;
@@ -42,24 +39,18 @@ use RuntimeException;
 class Consumer
 {
     /**
-     * @var \PSX\Http\Client
+     * @var \PSX\Http\Client\ClientInterface
      */
     protected $client;
-
-    /**
-     * @var \PSX\Data\ReaderInterface
-     */
-    protected $reader;
 
     /**
      * @var \PSX\Oauth\ResponseImporter
      */
     protected $importer;
 
-    public function __construct(Client $client)
+    public function __construct(ClientInterface $client)
     {
         $this->client   = $client;
-        $this->reader   = new Form();
         $this->importer = new ResponseImporter();
     }
 
@@ -118,7 +109,7 @@ class Consumer
         $response = $this->client->request($request);
 
         // parse the response
-        return $this->importer->import(new Response(), $this->reader->read($response->getBody()));
+        return $this->importer->import(new Response(), (string) $response->getBody());
     }
 
     /**
@@ -174,7 +165,7 @@ class Consumer
         $response = $this->client->request($request);
 
         // parse the response
-        return $this->importer->import(new Response(), $this->reader->read($response->getBody()));
+        return $this->importer->import(new Response(), (string) $response->getBody());
     }
 
     /**
