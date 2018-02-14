@@ -3,7 +3,7 @@
  * PSX is a open source PHP framework to develop RESTful APIs.
  * For the current version and informations visit <http://phpsx.org>
  *
- * Copyright 2010-2016 Christoph Kappestein <k42b3.x@gmail.com>
+ * Copyright 2010-2018 Christoph Kappestein <christoph.kappestein@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ use RuntimeException;
 /**
  * This is a consumer implementation of OAuth Core 1.0
  *
- * @author  Christoph Kappestein <k42b3.x@gmail.com>
+ * @author  Christoph Kappestein <christoph.kappestein@gmail.com>
  * @author  Andy Smith <http://term.ie>
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @link    http://phpsx.org
