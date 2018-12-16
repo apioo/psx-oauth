@@ -20,6 +20,8 @@
 
 namespace PSX\Oauth\Tests\Signature;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * RSASHA1Test
  *
@@ -27,7 +29,7 @@ namespace PSX\Oauth\Tests\Signature;
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @link    http://phpsx.org
  */
-class RSASHA1Test extends \PHPUnit_Framework_TestCase
+class RSASHA1Test extends TestCase
 {
     public function testNotImplemented()
     {

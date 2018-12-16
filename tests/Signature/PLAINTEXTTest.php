@@ -20,6 +20,7 @@
 
 namespace PSX\Oauth\Tests\Signature;
 
+use PHPUnit\Framework\TestCase;
 use PSX\Oauth\Signature\PLAINTEXT;
 
 /**
@@ -29,7 +30,7 @@ use PSX\Oauth\Signature\PLAINTEXT;
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @link    http://phpsx.org
  */
-class PLAINTEXTTest extends \PHPUnit_Framework_TestCase
+class PLAINTEXTTest extends TestCase
 {
     public function testSignature()
     {

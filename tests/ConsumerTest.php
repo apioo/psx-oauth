@@ -24,6 +24,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 use PSX\Http\Authentication;
 use PSX\Http\Client\Client;
 use PSX\Http\Client\GetRequest;
@@ -38,7 +39,7 @@ use PSX\Uri\Url;
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @link    http://phpsx.org
  */
-class ConsumerTest extends \PHPUnit_Framework_TestCase
+class ConsumerTest extends TestCase
 {
     const CONSUMER_KEY      = 'dpf43f3p2l4k3l03';
     const CONSUMER_SECRET   = 'kd94hf93k423kf44';

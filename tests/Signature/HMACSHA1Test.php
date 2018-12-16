@@ -20,6 +20,7 @@
 
 namespace PSX\Oauth\Tests\Signature;
 
+use PHPUnit\Framework\TestCase;
 use PSX\Oauth\Signature\HMACSHA1;
 
 /**
@@ -29,7 +30,7 @@ use PSX\Oauth\Signature\HMACSHA1;
  * @license http://www.apache.org/licenses/LICENSE-2.0
  * @link    http://phpsx.org
  */
-class HMACSHA1Test extends \PHPUnit_Framework_TestCase
+class HMACSHA1Test extends TestCase
 {
     public function testSignature()
     {
