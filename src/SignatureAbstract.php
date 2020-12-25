@@ -52,7 +52,7 @@ abstract class SignatureAbstract
      * @param string $signature
      * @return boolean
      */
-    public function verify($baseString, $consumerSecret, $tokenSecret = '', $signature)
+    public function verify($baseString, $consumerSecret, $tokenSecret, $signature)
     {
         $lft = Consumer::urlDecode($signature);
         $rgt = Consumer::urlDecode($this->build($baseString, $consumerSecret, $tokenSecret));
