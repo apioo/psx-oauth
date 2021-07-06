@@ -111,10 +111,9 @@ class Request extends Record
     public function setCallback($callback)
     {
         if ($callback == 'oob') {
-            // callback was set "out of bound" ... we get the url later from the
-            // consumer object
+            // callback was set "out of bound" ... we get the url later from the consumer object
             $this->setProperty('oauth_callback', 'oob');
-        } elseif (strlen($callback) >= 7 && strlen($callback) <= 256 && filter_var($callback, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
+        } elseif (strlen($callback) >= 7 && strlen($callback) <= 256 && filter_var($callback, FILTER_VALIDATE_URL)) {
             $this->setProperty('oauth_callback', $callback);
         } else {
             throw new \InvalidArgumentException('Invalid callback format');
